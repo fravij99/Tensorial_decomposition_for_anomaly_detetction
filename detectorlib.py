@@ -581,7 +581,7 @@ class detector():
     self.df=original_df
 
     # Prospettiva Y: ruota assi, poi reshape
-    reshaped_data_Y = self.reshape_with_moveaxis(temporal_indices=[views[1]], spatial_indices=[views[2], views[0]], axis_order=(1, 2, 0))
+    reshaped_data_Y = self.reshape_with_moveaxis(temporal_indices=[views[1]], spatial_indices=[views[2], views[0]], axis_order=(2, 0, 1))
     print("Prospettiva Y:", reshaped_data_Y.shape)
     self.df = reshaped_data_Y
     self.anomalies_stat()
@@ -589,7 +589,7 @@ class detector():
     self.df=original_df
 
     # Prospettiva Z: ruota assi, poi reshape
-    reshaped_data_Z = self.reshape_with_moveaxis(temporal_indices=[views[2]], spatial_indices=[views[0], views[1]], axis_order=(2, 0, 1))
+    reshaped_data_Z = self.reshape_with_moveaxis(temporal_indices=[views[2]], spatial_indices=[views[0], views[1]], axis_order=(1, 2, 0))
     print("Prospettiva Z:", reshaped_data_Z.shape)
     self.df = reshaped_data_Z
     self.anomalies_stat()
