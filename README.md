@@ -88,7 +88,7 @@ Generates graphs for sensor data.
 
 
 ## Implementation
-An easy implementation of every class is shown in the main.py, statistical_main.py, deep_main.py, sheet.py and printer.py files. The other folders contain the results of anomaly detection for classical models and the temporal plot of every sensor detection. 
+An easy implementation of every class is shown in the anomalies_generation_intersection.py, statistical_main.py, deep_main.py, sheet.py and printer.py files. The other folders contain the results of anomaly detection for classical models and the temporal plot of every sensor detection. 
 
 ## Installation
 You can clone the repository using the command:
