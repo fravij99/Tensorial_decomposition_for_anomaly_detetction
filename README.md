@@ -2,7 +2,7 @@
 
 <h1 align="center"> Numerical simulation for understanding anomalies hierarchical structures </h1> <br>
 
-<img align="right" src=https://github.com/fravij99/Numerical_simulation_anomalies_hierarchy/blob/master/images/3d_hierarchy.png  width="270">
+<img align="right" src="https://raw.githubusercontent.com/fravij99/Tensorial_decomposition_for_anomaly_detetction/master/images/anomalies_fish.png" width=400>
 Hey there! 
 
 This is my master thesis future insights repository. 
@@ -11,6 +11,25 @@ This library provides tools for anomaly detection in multi-dimensional datasets 
 ## Usage
 ### Anomaly Detection Library
 This Python library offers a range of functionalities for anomaly detection and sinthetic-data creation, particularly tailored for sensor data analysis. It provides tools to preprocess, reshape, and apply various statistical and deep learning models for anomaly detection.
+
+### generator Class
+* `random_matrix_loading()`
+Treats random matrix generated in the main in order to verify herarchical relationships between anomaly classes.
+* `random_exp_generator()`
+Generates a synthetic dataset following an exponential distribution.
+* `random_anomalies_generation()`
+Generates some statistical distribution infecting them with noise anomalies on several hierarchic levels
+*`random_big_anomaliy_generation()`
+Generates some statistical distribution infecting them localize gaussian anomalies
+* `introduce_anomalies_1D()`
+generates anomalies 1D for every point of view inserted by the user
+* `introduce_anomalies_2D()`
+generates anomalies 2D for every point of view inserted by the user
+* `introduce_anomalies_3D()`
+generates anomalies 3D for every point of view inserted by the user
+* `hitmaps()`
+Realizes some slices of the starting tensor as matrix NxN slices along all the components
+
 
 ### detector Class
 * `tuple_prod(tupla)`
@@ -51,27 +70,7 @@ Detect anomalies using deep learning and other machine learning models, respecti
 Reshapes data for all possible shapes and detects anomalies for deep models.
 * `PCA_graph()`
 Generates and saves plots showing PCA results, including variance explained by different numbers of components.
-* `random_matrix_loading()`
-Treats random matrix generated in the main in order to verify herarchical relationships between anomaly classes.
-* `random_exp_generator()`
-Generates a synthetic dataset following an exponential distribution.
-* `random_anomalies_generation()`
-Generates some statistical distribution infecting them with noise anomalies on several hierarchic levels
-*`random_big_anomaliy_generation()`
-Generates some statistical distribution infecting them localize gaussian anomalies
 
-<img align="center" src=https://github.com/fravij99/Numerical_simulation_anomalies_hierarchy/blob/master/images/random_exp_distribution_demo.png
-  width="370">
-
-<img align="center" src=https://github.com/fravij99/Numerical_simulation_anomalies_hierarchy/blob/master/images/img0.png
-  width="370">
-
-<img align="center" src=https://github.com/fravij99/Numerical_simulation_anomalies_hierarchy/blob/master/images/img1.png
-  width="370">
-
-<img align="center" src=https://github.com/fravij99/Numerical_simulation_anomalies_hierarchy/blob/master/images/img2.png
-  width="370">
-  
 ### sheet Class
 * `load_timestamps(path, sens_num)`
 Loads timestamps from an Excel file.
