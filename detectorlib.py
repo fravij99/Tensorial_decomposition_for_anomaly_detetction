@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from pandas.core.computation.expr import intersection
+from tensorflow.python.ops.gen_io_ops import read_file
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 from plot_keras_history import plot_history
@@ -20,35 +22,12 @@ from plot_keras_history import plot_history
 import tensorflow as tf
 import matplotlib.dates as mdates
 import networkx as nx
-import numpy as np
-
-'''In this class we have to set the local variables to assign ath every index of our notations'''
-'''This '''
-class detector():
-  
-  def tuple_prod(self, tuple):
-    prod = 1
-    for dim in tuple:
-        prod *= dim
-    return prod
-  
-
-  '''Reads from excel file the data and append the sheets to the third index of the tensor: (temporal samples, features, sensors)'''
-  def load_preprocess(self, path, sens_num):
-        self.df = []
-        self.xlsx_path=path
-        for sheet_num in range(sens_num): 
-            sheet_df = pd.read_excel(path, sheet_name=sheet_num)
-            self.timestamp = sheet_df['timestamp'].dt.date
-            sheet_df = sheet_df.drop(['Unnamed: 0', 'timestamp', 'sensor', 'off_ch1', 'off_ch2', 'off_ch3', 'off_ch4'], axis=1)
-            self.df.append(sheet_df)
-            
-        self.df = np.array(self.df)
-        self.df = np.nan_to_num(self.df)
-        self.df = (self.df - self.df.min()) / (self.df.max() - self.df.min())
-        self.df = self.df.transpose(1, 0, 2)
 
 
+
+
+
+class generator():
   '''This function is need to trat random matrix generated in the main in order to verify herarchical relationships between anomaly classes'''
   def random_matrix_loading(self):
 
@@ -63,20 +42,15 @@ class detector():
       self.create_statistical_model(model)
       plt.imshow(self.df, cmap='hot', interpolation='nearest')
       plt.show()
-
-      # Per la rete neurale, anche l'ordine in cui inserisco le dimensioni risulta essere importante
       self.stamp_all_shape_anomalies(possible_shapes)
 
 
   def random_walk(self, length, dim=1):
     dir_array = np.random.randint(dim, size=length)
     updown_array = np.random.choice([-1, 1], size=length)
-
     steps = np.zeros((length, dim))
     steps[np.arange(length), dir_array] = updown_array
-
     pos = np.cumsum(steps, axis=0).reshape(-1)
-
     return (pos/(pos.max()))
 
 
@@ -134,19 +108,19 @@ class detector():
     X, Y, Z = tensor.shape
     if coordinate == 'x':
         for i in tqdm(range(num_anomalies), desc='Infecting with X anomalies 1D...'):
-            anomaly = np.random.normal(loc=0.0, scale=100.0, size=(X))
+            anomaly = np.random.normal(loc=50, scale=1.0, size=(X))
             y, z = np.random.randint(0, Y), np.random.randint(0, Z)
             tensor[:, y, z] += anomaly  
             print(f'X anomaly at (y, z)=({y}, {z})')
     elif coordinate == 'y':
         for i in tqdm(range(num_anomalies), desc='Infecting with Y anomalies 1D...'):
-            anomaly = np.random.normal(loc=0.0, scale=100.0, size=(Y))
+            anomaly = np.random.normal(loc=50, scale=1.0, size=(Y))
             x, z = np.random.randint(0, X), np.random.randint(0, Z)
             tensor[x, :, z] += anomaly 
             #print(f'Y anomaly at (x, z)=({x}, {z})')
     elif coordinate == 'z':
         for i in tqdm(range(num_anomalies), desc='Infecting with Z anomalies 1D...'):
-            anomaly = np.random.normal(loc=0.0, scale=100.0, size=(Z))
+            anomaly = np.random.normal(loc=50, scale=1.0, size=(Z))
             x, y = np.random.randint(0, X), np.random.randint(0, Y)
             tensor[x, y, :] += anomaly  
             #print(f'Z anomaly at (x, y)=({x}, {y})')
@@ -181,17 +155,17 @@ class detector():
   def introduce_anomalies_3D(self, tensor, num_anomalies, scale_range, index):
     X, Y, Z = tensor.shape
     for _ in tqdm(range(num_anomalies), desc="Infecting the tensor..."):
-        # Scegli la scala dell'anomalia casualmente all'interno di un range dato
+        # Choose the anomaly size inside the scale_range
         scale_x = np.random.randint(scale_range[0], scale_range[1])
         scale_y = np.random.randint(scale_range[0], scale_range[1])
         scale_z = np.random.randint(scale_range[0], scale_range[1])
         
-        # Scegli una posizione casuale all'interno del tensore
+        # Chose randomly the position inside the tensor
         start_x = np.random.randint(0, X - scale_x)
         start_y = np.random.randint(0, Y - scale_y)
         start_z = np.random.randint(0, Z - scale_z)
         
-        # Introduci l'anomalia con un valore differente (ad esempio una distribuzione anomala)
+        # Introduce the anomaly with a different value (anomalous distribution)
         anomaly = np.random.normal(loc=10.0, scale=5.0, size=(scale_x, scale_y, scale_z))
         tensor[start_x:start_x + scale_x, start_y:start_y + scale_y, start_z:start_z + scale_z] = anomaly
 
@@ -222,6 +196,35 @@ class detector():
     plt.close()
 
 
+
+
+
+class detector():
+  
+  def tuple_prod(self, tuple):
+    prod = 1
+    for dim in tuple:
+        prod *= dim
+    return prod
+  
+
+  '''Reads from excel file the data and append the sheets to the third index of the tensor: (temporal samples, features, sensors)'''
+  def load_preprocess(self, path, sens_num):
+        self.df = []
+        self.xlsx_path=path
+        for sheet_num in range(sens_num): 
+            sheet_df = pd.read_excel(path, sheet_name=sheet_num)
+            self.timestamp = sheet_df['timestamp'].dt.date
+            sheet_df = sheet_df.drop(['Unnamed: 0', 'timestamp', 'sensor', 'off_ch1', 'off_ch2', 'off_ch3', 'off_ch4'], axis=1)
+            self.df.append(sheet_df)
+            
+        self.df = np.array(self.df)
+        self.df = np.nan_to_num(self.df)
+        self.df = (self.df - self.df.min()) / (self.df.max() - self.df.min())
+        self.df = self.df.transpose(1, 0, 2)
+
+
+
   '''Given the desired index from the main, it reshape the df into a tensor as the user wants'''
   def reshape_ortogonal_tensor(self, temporal_indices, spatial_indices):
     if temporal_indices[0] == 0 and temporal_indices[1] == 0:
@@ -243,7 +246,6 @@ class detector():
   
   
   '''You have to pass the indices without zeros'''
-  # devi cambiare tutte le volte la shape da cui parti per essere sicuro
   def reshape_linear_tensor(self, temporal_indices, spatial_indices, standardize=False):
 
     self.temporal_indices = temporal_indices
@@ -450,8 +452,10 @@ class detector():
     self.anomalies_indices = anomalies_idx[np.argsort(mse[anomalies_idx])[::-1]]
 
 
+  """This function contains 5 different statistical models and their own evaluation method for anomaly detection. 
+     PCA has more than one evaluation method and it must be set at the call 'anomaly_method' """
   def anomalies_stat(self):
-    anomaly_percentage = 0.05  # 5%
+    anomaly_percentage = 0.10  
 
 
     if self.str_model == 'SVM':
@@ -492,41 +496,41 @@ class detector():
 
     elif self.str_model == 'PCA':
         self.fit_model()
-        anomaly_method = 'reconstruction_error'  # Modifica questo valore per provare metodi diversi
+        anomaly_method = 'reconstruction_error'  # Modify this line to change evaluation method
 
         if anomaly_method == 'reconstruction_error':
-            # Metodo basato sulla ricostruzione approssimata usando inverse_transform
+            # Method based in the approximate reconstruction using inverse_transform
             X_pca = self.model.transform(self.df)
             print('Explained variance:', self.model.explained_variance_ratio_)
             X_reconstructed = self.model.inverse_transform(X_pca)
             mse = np.mean(np.square(self.df - X_reconstructed), axis=1)
 
         elif anomaly_method == 'residual_analysis':
-            # Metodo basato sull'analisi del residuo
+            # Residual analysis method
             X_pca = self.model.transform(self.df)
             X_projected = X_pca @ self.model.components_ + self.model.mean_
             residuals = self.df - X_projected
             mse = np.mean(residuals**2, axis=1)
 
         elif anomaly_method == 'low_variance_components':
-            # Metodo basato sulle componenti rimanenti (meno significative)
+            # Method based on the less significative components 
             X_pca = self.model.transform(self.df)
             num_components = self.model.n_components_
-            residual_projection = X_pca[:, num_components:]  # Considera solo le componenti scartate
+            residual_projection = X_pca[:, num_components:]  # consider only discarted components
             mse = np.sum(residual_projection**2, axis=1)
 
         elif anomaly_method == 'log_likelihood_score':
-            # Metodo basato su score_samples per calcolare la verosimiglianza logaritmica
-            mse = -self.model.score_samples(self.df)  # Inverti per identificare le anomalie come valori alti
+            # Score based method
+            mse = -self.model.score_samples(self.df)  # It needs the - in order to idetify anomalies as upper values
 
         else:
             raise ValueError("Unknown anomaly detection method")
 
-        # Calcolo del threshold per identificare le anomalie
+        # Threshold computing
         threshold = np.percentile(mse, 100 - anomaly_percentage * 100)
         anomaly_indices = np.where(mse > threshold)[0]
 
-        # Ordinamento degli indici delle anomalie per l'importanza
+        # Anomalies sorting
         self.anomalies_indices = anomaly_indices[np.argsort(-mse[anomaly_indices])]
 
 
@@ -535,8 +539,7 @@ class detector():
 
 
   def save_linear_anomaly_indices(self):
-      # divido l'indice dell'anomalia per uno degli indici temporali, poi trovo l'intero piu vicino e ho fatto teoricamente  f'final_validation_autoencoder_{self.xlsx_path}
-
+      
     with open(f'{self.xlsx_path}/anomalies_{self.str_model}_pruned_{self.temporal_indices}_{self.spatial_indices}.txt', 'w') as file:
         for indice in self.anomalies_indices:
           
@@ -547,6 +550,84 @@ class detector():
             indice=round(self.temporal_indices[0]*((indice/(self.temporal_indices[0]*self.temporal_indices[1])) % 1)), int(self.temporal_indices[1]*((indice/(self.temporal_indices[1])) % 1)) +1, int(indice/(self.temporal_indices[1]*self.temporal_indices[0])) +1
             
           file.write(f"{indice}\n")
+          
+
+  """This functions MUST be called after stamp_all_views_anomalies or after save_anomalies_indices.
+     It opens the files in 'anomalies_cubes.xlsx' reads the files for each view and saves the anomalies indices in vectors (for exaple saves the indices from the X view file in indices_x, and the same fo Y and Z )"""
+  def create_anomalies_vectors_fromfile (self, views):
+
+      possible_shapes2D = [
+          (views[0], views[1], views[2]),
+          (views[1], views[0], views[2]),
+          (views[2], views[1], views[0])
+      ]
+      # Load indices from files
+      self.indices_x = []
+      self.indices_y = []
+      self.indices_z = []
+
+      coordMapping = [self.indices_x, self.indices_y, self.indices_z]
+
+      coord_index = 0
+      for coordinates in possible_shapes2D:
+        try:
+          x,y,z = coordinates
+          print(f'{self.xlsx_path}/anomalies_{self.str_model}_pruned_[{x}]_[{y}, {z}].txt', 'r')
+          with open(f'{self.xlsx_path}/anomalies_{self.str_model}_pruned_[{x}]_[{y}, {z}].txt', 'r') as file:
+              for line in file:
+                stripped_line = line.strip()  # Remove any surrounding whitespace or newline
+                if stripped_line.isdigit():  # Ensure it's a valid number
+                  coordMapping[coord_index].append(int(stripped_line))  # Convert to integer and add to the list
+                else:
+                  print(f"Warning: Non-integer line found: '{stripped_line}'")
+
+
+        except FileNotFoundError:
+            print("Error: File 'indices.txt' not found.")
+        except Exception as e:
+            print(f"An error occurred while reading the file: {e}")
+        finally:
+            coord_index = coord_index + 1
+
+
+
+  """this function takes the anomalies indices vectors (indices_x, indices_y, indices_z) and for every point of view in input returns an 'intersection' vector 
+      that contains the indices of the intersection of the most relevant anomalies for each pov"""
+  def find_anomalies_intersection_from_files(self, views, pov):
+      """
+      Finds intersections of anomalies between planes using saved anomaly files.
+
+      Parameters:
+      - pov: The plane views to analyze ('X', 'Y', 'Z').
+      - views: A list of the dimensions [X, Y, Z] of the 3D tensor.
+
+      Returns:
+      - A list of tuples containing the intersection coordinates (x, y, z) or relevant coordinates for the plane.
+      """
+      intersections = []
+
+      if pov == 'X':  # Y-Z plane
+          # Find intersection of anomalies in Y-Z plane
+            for x in range(0,views[0]):
+                intersections.append((x, self.indices_y[0], self.indices_z[0]))
+            print('the intersections on the YZ plane are:', intersections)
+
+
+      elif pov == 'Y':  # X-Z plane
+          # Find intersection of anomalies in X-Z plane
+            for y in range(0,views[1]):
+                intersections.append((self.indices_x[0], y, self.indices_z[0]))
+            print('the intersections on the XZ plane are:', intersections)
+
+      elif pov == 'Z':  # X-Y plane
+          # Find intersection of anomalies in X-Y plane
+            for z in range(0,views[2]):
+                intersections.append((self.indices_x[0], self.indices_y[0], z))
+            print('the intersections on the XY plane are:', intersections)
+
+
+      print(f'The intersection vector length is: {len(intersections)}') #checks the length of the intersection vector: should be the pov length
+      return intersections
 
 
   def stamp_all_shape_anomalies(self, possible_shapes, model):
@@ -558,43 +639,30 @@ class detector():
             self.save_linear_anomaly_indices()
 
 
-  def stamp_all_views_anomalies(self, views, model):
-    """
-    Applies anomaly detection from multiple perspectives (X, Y, Z).
-    
-    Parameters:
-    - views (list): A list containing dimensions of the original tensor [X, Y, Z].
-    - model (str): The name of the anomaly detection model.
-    """
-    self.xlsx_path = 'anomalies_cubes.xlsx'
-    self.create_statistical_model(model)
-    
-    # Partiamo dal tensore 3D originale per ciascuna prospettiva
-    original_df = self.df.copy()  # Conserviamo il tensore originale
+  def stamp_all_views_anomalies(self, data, model, temporal_indices, spatial_indices, axis_orders):
+      """
+      Applies anomaly detection from multiple perspectives.
+      
+      Parameters:
+      - views (list): A list containing dimensions of the original tensor [X, Y, Z].
+      - model (str): The name of the anomaly detection model.
+      - temporal_indices (list): A list of temporal indices for each perspective.
+      - spatial_indices (list): A list of spatial indices for each perspective.
+      - axis_orders (list): A list of axis orders (tuples) for each perspective.
+      """
+      self.xlsx_path = 'anomalies_cubes.xlsx'
+      self.create_statistical_model(model)
 
-    # Prospettiva X: nessun cambio assi, solo reshape
-    reshaped_data_X = self.reshape_with_moveaxis(temporal_indices=[views[0]], spatial_indices=[views[1], views[2]], axis_order=(0, 1, 2))
-    print("Prospettiva X:", reshaped_data_X.shape)
-    self.df = reshaped_data_X
-    self.anomalies_stat()
-    self.save_linear_anomaly_indices()
-    self.df=original_df
+      # Let's keep the original tensor
+      self.df=data
+      original_df = self.df.copy()
 
-    # Prospettiva Y: ruota assi, poi reshape
-    reshaped_data_Y = self.reshape_with_moveaxis(temporal_indices=[views[1]], spatial_indices=[views[2], views[0]], axis_order=(2, 0, 1))
-    print("Prospettiva Y:", reshaped_data_Y.shape)
-    self.df = reshaped_data_Y
-    self.anomalies_stat()
-    self.save_linear_anomaly_indices()
-    self.df=original_df
+      reshaped_data_X = self.reshape_with_moveaxis(temporal_indices, spatial_indices, axis_orders)
+      self.df = reshaped_data_X
+      self.anomalies_stat()
+      self.save_linear_anomaly_indices()
+      self.df=original_df
 
-    # Prospettiva Z: ruota assi, poi reshape
-    reshaped_data_Z = self.reshape_with_moveaxis(temporal_indices=[views[2]], spatial_indices=[views[0], views[1]], axis_order=(1, 2, 0))
-    print("Prospettiva Z:", reshaped_data_Z.shape)
-    self.df = reshaped_data_Z
-    self.anomalies_stat()
-    self.save_linear_anomaly_indices()
-    self.df=original_df
 
   
   def stamp_all_shape_deep_anomalies(self, possible_shapes, model):
@@ -634,7 +702,7 @@ class sheet:
 
     def load_timestamps(self, path, sens_num):
         self.df = []
-        for sheet_num in range(sens_num):  # Change to range(18) when you have all
+        for sheet_num in range(sens_num):  
             sheet_df = pd.read_excel(path, sheet_name=sheet_num)
             sheet_df = sheet_df['Date Acquisition']
             self.df.append(sheet_df)
@@ -676,7 +744,7 @@ class printer():
   def load(self, path, sens_num):
     self.df = []
     self.xlsx_path=path
-    for sheet_num in range(sens_num):  # Change to range(18) when you have all
+    for sheet_num in range(sens_num):  
             sheet_df = pd.read_excel(path, sheet_name=sheet_num)
             sheet_df = sheet_df.drop(['Unnamed: 0', 'off_ch1', 'off_ch2', 'off_ch3', 'off_ch4', 'timestamp'], axis=1)
             self.df.append(sheet_df)
